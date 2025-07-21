@@ -22,7 +22,7 @@ const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onProgramClick }) => {
       <ul {...stylex.props(styles.programsList)}>
         {programs.map(program => (
           <li key={program.title} {...stylex.props(styles.programItem)} onClick={() => onProgramClick(program)}>
-            <img src={getIconUrl(program.iconID, { isDirectory: () => false }, 16)} alt={program.title} {...stylex.props(styles.programIcon)} />
+            <img src={getIconUrl(program.icon, { isDirectory: () => false }, 16)} alt={program.title} {...stylex.props(styles.programIcon)} />
             <span>{program.title}</span>
           </li>
         ))}

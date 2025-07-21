@@ -12,11 +12,9 @@ interface DesktopIconProps {
 }
 
 const DesktopIcon: React.FC<DesktopIconProps> = ({ name, iconUrl, x, y, onDoubleClick, onDrag }) => {
-  const [isDragging, setIsDragging] = React.useState(false);
   const dragStartPos = React.useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
     dragStartPos.current = { x: e.clientX - x, y: e.clientY - y };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -24,7 +22,6 @@ const DesktopIcon: React.FC<DesktopIconProps> = ({ name, iconUrl, x, y, onDouble
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };

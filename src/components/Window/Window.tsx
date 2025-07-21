@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { styles } from './Window.styles';
 
@@ -21,12 +21,10 @@ interface WindowProps {
 }
 
 const Window: React.FC<WindowProps> = ({ title, children, x, y, width, height, zIndex, state, isActive, onClose, onFocus, onDrag, onMinimize, onMaximize, onRestore }) => {
-  const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
 
   const handleMouseDown = (e: React.MouseEvent) => {
     onFocus();
-    setIsDragging(true);
     dragStartPos.current = { x: e.clientX - x, y: e.clientY - y };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -34,7 +32,6 @@ const Window: React.FC<WindowProps> = ({ title, children, x, y, width, height, z
     };
 
     const handleMouseUp = () => {
-      setIsDragging(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };

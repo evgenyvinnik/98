@@ -39,7 +39,7 @@ const Desktop: React.FC = () => {
           }
 
                     const statPromises = files.map(file =>
-            new Promise<{ name: string; stats: Stats }>((resolve, reject) => {
+            new Promise<{ name: string; stats: Stats }>((resolve) => {
               const filePath = `${desktopPath}${file}`;
               fs.stat(filePath, (err: Error | null, stats: Stats) => {
                 if (err) {

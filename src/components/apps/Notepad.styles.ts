@@ -4,7 +4,8 @@ export const styles = stylex.create({
   textarea: {
     width: '100%',
     height: '100%',
-    border: 'none',
+    borderWidth: 0,
+    borderStyle: 'none',
     resize: 'none',
     fontFamily: 'monospace',
     fontSize: '14px',
