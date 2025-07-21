@@ -1,6 +1,9 @@
 import React from 'react';
 import * as stylex from '@stylexjs/stylex';
 import TaskbarButton from '../TaskbarButton/TaskbarButton';
+import TaskbarTime from './TaskbarTime';
+import { AppWindow } from '../../contexts/WindowManagerContext';
+import { getIconUrl } from '../Desktop/icon-helpers';
 
 const styles = stylex.create({
   taskbar: {
@@ -74,19 +77,15 @@ const styles = stylex.create({
   },
 });
 
-interface AppWindow {
-  id: number;
-  title: string;
-}
-
 interface TaskbarProps {
   onStartButtonClick: () => void;
   windows: AppWindow[];
   activeWindowId: number | null;
   onWindowFocus: (id: number) => void;
+  onWindowMinimize: (id: number) => void;
 }
 
-const Taskbar: React.FC<TaskbarProps> = ({ onStartButtonClick, windows, activeWindowId, onWindowFocus }) => {
+const Taskbar: React.FC<TaskbarProps> = ({ onStartButtonClick, windows, activeWindowId, onWindowFocus, onWindowMinimize }) => {
   return (
     <div {...stylex.props(styles.taskbar)}>
       <button {...stylex.props(styles.startButton)} onClick={onStartButtonClick}>
@@ -96,17 +95,24 @@ const Taskbar: React.FC<TaskbarProps> = ({ onStartButtonClick, windows, activeWi
       <div {...stylex.props(styles.divider)} />
       <div {...stylex.props(styles.tasks)}>
         {windows.map(win => (
-          <TaskbarButton
+                              <TaskbarButton
             key={win.id}
             title={win.title}
+            icon={getIconUrl(win.icon, { isDirectory: () => false }, 16)}
             isActive={win.id === activeWindowId}
-            onClick={() => onWindowFocus(win.id)}
+            onClick={() => {
+              if (win.id === activeWindowId) {
+                onWindowMinimize(win.id);
+              } else {
+                onWindowFocus(win.id);
+              }
+            }}
           />
         ))}
       </div>
       <div {...stylex.props(styles.divider)} />
       <div {...stylex.props(styles.tray)}>
-        <div {...stylex.props(styles.time)}>{new Date().toLocaleTimeString()}</div>
+        <TaskbarTime />
       </div>
     </div>
   );

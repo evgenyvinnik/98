@@ -19,24 +19,28 @@ const styles = stylex.create({
   },
   activeButton: {
     borderWidth: '1px',
-    borderStyle: 'solid',
-    borderTopColor: 'var(--ButtonShadow)',
-    borderLeftColor: 'var(--ButtonShadow)',
-    borderRightColor: 'var(--ButtonDkShadow)',
-    borderBottomColor: 'var(--ButtonDkShadow)',
+    borderStyle: 'inset',
     boxShadow: 'none',
+    padding: '1px 5px',
+  },
+  icon: {
+    width: '16px',
+    height: '16px',
+    marginRight: '4px',
   },
 });
 
 interface TaskbarButtonProps {
-  title: string;
+  title:string;
+  icon: string;
   isActive: boolean;
   onClick: () => void;
 }
 
-const TaskbarButton: React.FC<TaskbarButtonProps> = ({ title, isActive, onClick }) => {
+const TaskbarButton: React.FC<TaskbarButtonProps> = ({ title, icon, isActive, onClick }) => {
   return (
     <button {...stylex.props(styles.button, isActive && styles.activeButton)} onClick={onClick}>
+            <img src={icon} alt={title} {...stylex.props(styles.icon)} />
       {title}
     </button>
   );

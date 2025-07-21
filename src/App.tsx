@@ -1,96 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { styles } from './App.styles';
 import Desktop from './components/Desktop/Desktop';
 import Taskbar from './components/Taskbar/Taskbar';
 import StartMenu from './components/StartMenu/StartMenu';
 import Window from './components/Window/Window';
+import WindowSwitcher from './components/WindowSwitcher/WindowSwitcher';
+import { WindowManagerProvider, useWindowManager } from './contexts/WindowManagerContext';
+import { MessageBoxProvider } from './contexts/MessageBoxContext';
+import { ThreeDeeFunProvider } from './contexts/ThreeDeeFunContext';
 import { Program } from './programs.tsx';
 
-interface AppWindow {
-  id: number;
-  title: string;
-  content: React.ReactNode;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  zIndex: number;
-  state: 'normal' | 'minimized' | 'maximized';
-}
-
-function App() {
+const AppContent: React.FC = () => {
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
-  const [openWindows, setOpenWindows] = useState<AppWindow[]>([]);
-  const [nextWindowId, setNextWindowId] = useState(0);
-  const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
-  const [highestZIndex, setHighestZIndex] = useState(0);
+  const { openWindows, activeWindowId, openWindow, closeWindow, focusWindow, minimizeWindow, maximizeWindow, restoreWindow, updateWindowPosition } = useWindowManager();
+  const [isSwitcherVisible, setIsSwitcherVisible] = useState(false);
+  const [switcherIndex, setSwitcherIndex] = useState(0);
 
   const toggleStartMenu = () => {
     setIsStartMenuOpen(prev => !prev);
   };
 
-  const openWindow = (program: Program) => {
-    const newWindow: AppWindow = {
-      id: nextWindowId,
+  const handleProgramClick = (program: Program) => {
+    openWindow({
       title: program.title,
+      icon: program.icon,
       content: <program.component />,
-      x: 100 + nextWindowId * 20,
-      y: 100 + nextWindowId * 20,
       width: 500,
       height: 400,
-      zIndex: highestZIndex + 1,
-      state: 'normal',
-    };
-    setHighestZIndex(highestZIndex + 1);
-    setOpenWindows(prev => [...prev, newWindow]);
-    setNextWindowId(prev => prev + 1);
-    setActiveWindowId(newWindow.id);
+    });
     setIsStartMenuOpen(false);
   };
 
-  const closeWindow = (id: number) => {
-    setOpenWindows(prev => prev.filter(win => win.id !== id));
-  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && (e.key === '1' || e.code === 'Backquote' || e.code === 'Tab')) {
+        e.preventDefault();
+        if (!isSwitcherVisible) {
+          const sortedWindows = [...openWindows].sort((a, b) => b.zIndex - a.zIndex);
+          const activeIndex = sortedWindows.findIndex(win => win.id === activeWindowId);
+          setSwitcherIndex(activeIndex !== -1 ? activeIndex : 0);
+        }
+        setIsSwitcherVisible(true);
+        setSwitcherIndex(prevIndex => (prevIndex + (e.shiftKey ? -1 : 1) + openWindows.length) % openWindows.length);
+      }
+    };
 
-    const focusWindow = (id: number) => {
-    const window = openWindows.find(win => win.id === id);
-    if (window && window.state === 'minimized') {
-      setOpenWindows(prev =>
-        prev.map(win => (win.id === id ? { ...win, state: 'normal', zIndex: highestZIndex + 1 } : win))
-      );
-    } else {
-      setOpenWindows(prev =>
-        prev.map(win => (win.id === id ? { ...win, zIndex: highestZIndex + 1 } : win))
-      );
-    }
-    setActiveWindowId(id);
-    setHighestZIndex(highestZIndex + 1);
-  };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') {
+        if (isSwitcherVisible) {
+          const sortedWindows = [...openWindows].sort((a, b) => b.zIndex - a.zIndex);
+          const selectedWindow = sortedWindows[switcherIndex];
+          if (selectedWindow) {
+            focusWindow(selectedWindow.id);
+          }
+          setIsSwitcherVisible(false);
+        }
+      }
+    };
 
-  const minimizeWindow = (id: number) => {
-    setOpenWindows(prev =>
-      prev.map(win => (win.id === id ? { ...win, state: 'minimized' } : win))
-    );
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
 
-  const maximizeWindow = (id: number) => {
-    setOpenWindows(prev =>
-      prev.map(win => (win.id === id ? { ...win, state: 'maximized' } : win))
-    );
-  };
-
-  const restoreWindow = (id: number) => {
-    setOpenWindows(prev =>
-      prev.map(win => (win.id === id ? { ...win, state: 'normal' } : win))
-    );
-  };
-
-  const updateWindowPosition = (id: number, x: number, y: number) => {
-    setOpenWindows(prev =>
-      prev.map(win => (win.id === id ? { ...win, x, y } : win))
-    );
-  };
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [isSwitcherVisible, openWindows, activeWindowId, switcherIndex, focusWindow]);
 
   return (
     <div {...stylex.props(styles.main)}>
@@ -104,7 +80,7 @@ function App() {
             isActive={win.id === activeWindowId}
             onClose={() => closeWindow(win.id)}
             onFocus={() => focusWindow(win.id)}
-            onDrag={updateWindowPosition.bind(null, win.id)}
+            onDrag={(x, y) => updateWindowPosition(win.id, x, y)}
             onMinimize={() => minimizeWindow(win.id)}
             onMaximize={() => maximizeWindow(win.id)}
             onRestore={() => restoreWindow(win.id)}
@@ -112,15 +88,34 @@ function App() {
             {win.content}
           </Window>
         ))}
-      <StartMenu isOpen={isStartMenuOpen} onProgramClick={openWindow} />
-      <Taskbar
+      <StartMenu isOpen={isStartMenuOpen} onProgramClick={handleProgramClick} />
+                  <Taskbar
         onStartButtonClick={toggleStartMenu}
         windows={openWindows}
         activeWindowId={activeWindowId}
         onWindowFocus={focusWindow}
+        onWindowMinimize={minimizeWindow}
       />
+      {isSwitcherVisible && (
+        <WindowSwitcher
+          windows={[...openWindows].sort((a, b) => b.zIndex - a.zIndex)}
+          selectedIndex={switcherIndex}
+        />
+      )}
     </div>
   );
-}
+};
+
+const App: React.FC = () => {
+  return (
+    <WindowManagerProvider>
+      <MessageBoxProvider>
+        <ThreeDeeFunProvider>
+          <AppContent />
+        </ThreeDeeFunProvider>
+      </MessageBoxProvider>
+    </WindowManagerProvider>
+  );
+};
 
 export default App;
