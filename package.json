@@ -32,7 +32,10 @@
 		"javascript"
 	],
 	"devDependencies": {
+		"@babel/plugin-syntax-typescript": "^7.25.9",
+		"@babel/preset-react": "^7.25.9",
 		"@playwright/test": "^1.45.0",
+		"@eslint/js": "^9.15.0",
 		"@stylexjs/babel-plugin": "^0.14.2",
 		"@stylexjs/eslint-plugin": "^0.14.2",
 		"@stylexjs/postcss-plugin": "^0.14.2",
@@ -58,16 +61,19 @@
 		"send": "^0.17.1",
 		"typescript": "^5.8.3",
 		"vite": "^7.0.5",
-		"webamp": "1.5.0"
+		"webamp": "1.5.0",
+		"globals": "^15.12.0",
+		"typescript-eslint": "^8.15.0"
 	},
 	"scripts": {
 		"test": "playwright test --reporter=list",
 		"test-codegen": "run-p test-codegen:server test-codegen:codegen",
 		"test-codegen:server": "npm run start-server -- --no-browser",
 		"test-codegen:codegen": "npx playwright codegen http://localhost:1998",
-		"lint": "cspell-cli lint .",
 		"dev": "vite",
-		"build": "vite build",
+		"build": "tsc -b && vite build",
+		"lint": "eslint .",
+		"preview": "vite preview",
 		"watch-fs-index": "onchange --initial --poll 1000 --kill -f add -f addDir -f unlink -f unlinkDir '**' --exclude 'filesystem-index.json' --exclude '**/.history/**' -- npm run make-fs-index",
 		"watch-fs-index @NOTE 1": "--kill makes it not queue up the events as tasks (as well as sending kill signal to old process)",
 		"watch-fs-index @NOTE 2": "When many files are changed, such as when doing a rebase or otherwise checking out old commits, it can take a long time to start working again. Add --verbose to view the stupid behavior. It probably makes it slower too, logging a lot.",
