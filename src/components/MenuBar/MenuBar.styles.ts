@@ -4,7 +4,9 @@ export const styles = stylex.create({
   menuBar: {
     display: 'flex',
     backgroundColor: 'var(--button-face)',
-    borderBottom: '1px solid var(--button-shadow)',
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--button-shadow)',
     height: '21px',
     flexShrink: 0,
   },
