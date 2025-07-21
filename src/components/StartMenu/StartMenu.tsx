@@ -1,7 +1,7 @@
 import React from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { styles } from './StartMenu.styles';
-import { programs, Program } from '../../programs';
+import { styles } from './StartMenu.styles.ts';
+import { programs, Program } from '../../programs.tsx';
 import { getIconUrl } from '../Desktop/icon-helpers';
 
 interface StartMenuProps {

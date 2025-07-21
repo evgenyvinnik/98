@@ -5,6 +5,8 @@ export const styles: StyleXStyles<{
   titleBar: unknown;
   activeTitleBar: unknown;
   title: unknown;
+  titleBarButtons: unknown;
+  titleBarButton: unknown;
   closeButton: unknown;
   content: unknown;
 }>;

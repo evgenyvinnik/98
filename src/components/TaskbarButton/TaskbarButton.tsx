@@ -1,6 +1,6 @@
 import React from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { styles } from './TaskbarButton.styles';
+import { styles } from './TaskbarButton.styles.ts';
 
 interface TaskbarButtonProps {
   title: string;

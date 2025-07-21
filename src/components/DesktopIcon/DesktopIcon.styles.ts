@@ -2,10 +2,11 @@ import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
   container: {
+    position: 'absolute',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    width: '75px',
+    width: '80px',
     padding: '4px',
     cursor: 'pointer',
     userSelect: 'none',

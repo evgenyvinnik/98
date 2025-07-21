@@ -1,4 +1,8 @@
 
+body.classic {
+	font-family: "MS Sans Serif", "Segoe UI", sans-serif;
+}
+
 .desktop {
 	background: var(--Background);
 }
@@ -41,9 +45,6 @@
 }
 .start-menu .back-link:before {
 	content: "«"
-}
-.the-thing-heading {
-	/* font-size: 1em; */
 }
 .windows-cant-do-it-you-can {
 	margin-top: 2em;

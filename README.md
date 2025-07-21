@@ -86,14 +86,36 @@ Also:
 
 See [CONTRIBUTING](CONTRIBUTING.md)
 
+## Tech Stack
+
+This project is built with a modern web stack, including:
+
+- **React**: For building the user interface.
+- **TypeScript**: For type-safe JavaScript.
+- **Vite**: As the build tool and development server.
+- **StyleX**: For component-based styling.
+- **BrowserFS**: For the virtual filesystem.
+
 ## Development Setup
 
-- Install [Git](https://git-scm.com/) if you don't already have it.
-- Install [Node.js](https://nodejs.org/) if you don't already have it.
-- [Clone the repository.](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository)
-- Open up a terminal / command prompt in the project directory, and run `npm install` to install dependencies.
-- Install one global dependency: `npm i -g browserfs@2.0.0` (this will be simplified in the future; I'm using two different versions of BrowserFS for some reason)
-- Run `npm start` to start up a live-reloading development web server.
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/1j01/98.git
+   ```
+2. **Navigate to the project directory:**
+   ```sh
+   cd 98
+   ```
+3. **Install dependencies:**
+   ```sh
+   npm install
+   ```
+4. **Run the development server:**
+   ```sh
+   npm run dev
+   ```
+
+This will start a live-reloading development server, and you can view the application in your browser at the specified local address.
 
 When pulling changes from git, run `npm install` again in case there are any new or updated dependencies.
 (If you know `package-lock.json` hasn't changed, you shouldn't need to do this.)

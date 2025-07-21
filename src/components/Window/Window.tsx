@@ -7,13 +7,20 @@ interface WindowProps {
   children: React.ReactNode;
   x: number;
   y: number;
+  width: number;
+  height: number;
+  zIndex: number;
+  state: 'normal' | 'minimized' | 'maximized';
   isActive: boolean;
   onClose: () => void;
   onFocus: () => void;
   onDrag: (x: number, y: number) => void;
+  onMinimize: () => void;
+  onMaximize: () => void;
+  onRestore: () => void;
 }
 
-const Window: React.FC<WindowProps> = ({ title, children, x, y, isActive, onClose, onFocus, onDrag }) => {
+const Window: React.FC<WindowProps> = ({ title, children, x, y, width, height, zIndex, state, isActive, onClose, onFocus, onDrag, onMinimize, onMaximize, onRestore }) => {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartPos = useRef({ x: 0, y: 0 });
 
@@ -36,11 +43,31 @@ const Window: React.FC<WindowProps> = ({ title, children, x, y, isActive, onClos
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+    if (state === 'minimized') {
+    return null;
+  }
+
+  const windowStyles = {
+    left: state === 'maximized' ? 0 : x,
+    top: state === 'maximized' ? 0 : y,
+    width: state === 'maximized' ? '100%' : width,
+    height: state === 'maximized' ? 'calc(100% - 28px)' : height,
+    zIndex,
+  };
+
   return (
-    <div {...stylex.props(styles.window)} style={{ left: x, top: y }} onMouseDown={onFocus}>
+    <div {...stylex.props(styles.window)} style={windowStyles} onMouseDown={onFocus}>
       <div {...stylex.props(styles.titleBar, isActive && styles.activeTitleBar)} onMouseDown={handleMouseDown}>
         <span {...stylex.props(styles.title)}>{title}</span>
-        <button {...stylex.props(styles.closeButton)} onClick={onClose}>X</button>
+        <div {...stylex.props(styles.titleBarButtons)}>
+          <button {...stylex.props(styles.titleBarButton)} onClick={onMinimize}>_</button>
+          {state === 'maximized' ? (
+            <button {...stylex.props(styles.titleBarButton)} onClick={onRestore}>❐</button>
+          ) : (
+            <button {...stylex.props(styles.titleBarButton)} onClick={onMaximize}>▢</button>
+          )}
+          <button {...stylex.props(styles.closeButton)} onClick={onClose}>X</button>
+        </div>
       </div>
       <div {...stylex.props(styles.content)}>
         {children}

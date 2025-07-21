@@ -13,7 +13,10 @@ interface AppWindow {
   content: React.ReactNode;
   x: number;
   y: number;
+  width: number;
+  height: number;
   zIndex: number;
+  state: 'normal' | 'minimized' | 'maximized';
 }
 
 function App() {
@@ -21,6 +24,7 @@ function App() {
   const [openWindows, setOpenWindows] = useState<AppWindow[]>([]);
   const [nextWindowId, setNextWindowId] = useState(0);
   const [activeWindowId, setActiveWindowId] = useState<number | null>(null);
+  const [highestZIndex, setHighestZIndex] = useState(0);
 
   const toggleStartMenu = () => {
     setIsStartMenuOpen(prev => !prev);
@@ -33,8 +37,12 @@ function App() {
       content: <program.component />,
       x: 100 + nextWindowId * 20,
       y: 100 + nextWindowId * 20,
-      zIndex: openWindows.length,
+      width: 500,
+      height: 400,
+      zIndex: highestZIndex + 1,
+      state: 'normal',
     };
+    setHighestZIndex(highestZIndex + 1);
     setOpenWindows(prev => [...prev, newWindow]);
     setNextWindowId(prev => prev + 1);
     setActiveWindowId(newWindow.id);
@@ -45,14 +53,36 @@ function App() {
     setOpenWindows(prev => prev.filter(win => win.id !== id));
   };
 
-  const focusWindow = (id: number) => {
+    const focusWindow = (id: number) => {
+    const window = openWindows.find(win => win.id === id);
+    if (window && window.state === 'minimized') {
+      setOpenWindows(prev =>
+        prev.map(win => (win.id === id ? { ...win, state: 'normal', zIndex: highestZIndex + 1 } : win))
+      );
+    } else {
+      setOpenWindows(prev =>
+        prev.map(win => (win.id === id ? { ...win, zIndex: highestZIndex + 1 } : win))
+      );
+    }
     setActiveWindowId(id);
+    setHighestZIndex(highestZIndex + 1);
+  };
+
+  const minimizeWindow = (id: number) => {
     setOpenWindows(prev =>
-      prev.map(win =>
-        win.id === id
-          ? { ...win, zIndex: prev.length - 1 }
-          : { ...win, zIndex: win.zIndex > prev.find(w => w.id === id)!.zIndex ? win.zIndex - 1 : win.zIndex }
-      )
+      prev.map(win => (win.id === id ? { ...win, state: 'minimized' } : win))
+    );
+  };
+
+  const maximizeWindow = (id: number) => {
+    setOpenWindows(prev =>
+      prev.map(win => (win.id === id ? { ...win, state: 'maximized' } : win))
+    );
+  };
+
+  const restoreWindow = (id: number) => {
+    setOpenWindows(prev =>
+      prev.map(win => (win.id === id ? { ...win, state: 'normal' } : win))
     );
   };
 
@@ -70,13 +100,14 @@ function App() {
         .map(win => (
           <Window
             key={win.id}
-            title={win.title}
-            x={win.x}
-            y={win.y}
+            {...win}
             isActive={win.id === activeWindowId}
             onClose={() => closeWindow(win.id)}
             onFocus={() => focusWindow(win.id)}
             onDrag={updateWindowPosition.bind(null, win.id)}
+            onMinimize={() => minimizeWindow(win.id)}
+            onMaximize={() => maximizeWindow(win.id)}
+            onRestore={() => restoreWindow(win.id)}
           >
             {win.content}
           </Window>

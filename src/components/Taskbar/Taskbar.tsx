@@ -1,6 +1,6 @@
 import React from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { styles } from './Taskbar.styles';
+import { styles } from './Taskbar.styles.ts';
 import TaskbarButton from '../TaskbarButton/TaskbarButton';
 
 interface AppWindow {
