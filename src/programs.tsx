@@ -1,40 +1,30 @@
 import React from 'react';
 import Notepad from './components/apps/Notepad';
-import IframeApp from './components/apps/IframeApp';
-import WinampApp from './components/apps/Winamp';
-import InternetExplorer from './components/apps/InternetExplorer';
 
 export interface Program {
   title: string;
-  icon: string;
-  component: React.ComponentType<any>;
+  iconID: string;
+  component: React.ComponentType;
 }
 
-const Placeholder: React.FC = () => {
-  return (
-    <div style={{ padding: '20px' }}>
-      <h2>Coming Soon</h2>
-      <p>This program is not yet implemented.</p>
-    </div>
-  );
-};
+const Placeholder: React.FC<{ title: string }> = ({ title }) => <div>{`${title} content will be implemented soon.`}</div>;
 
 export const programs: Program[] = [
-  { title: 'My Computer', icon: 'my-computer', component: Placeholder },
-  { title: 'My Documents', icon: 'my-documents-folder', component: Placeholder },
-  { title: 'Network Neighborhood', icon: 'network', component: Placeholder },
-  { title: 'Recycle Bin', icon: 'recycle-bin', component: Placeholder },
-  { title: 'My Pictures', icon: 'folder', component: Placeholder },
-    { title: 'Internet Explorer', icon: 'internet-explorer', component: InternetExplorer },
-  { title: 'Paint', icon: 'paint', component: Placeholder },
-  { title: 'Minesweeper', icon: 'minesweeper', component: Placeholder },
-  { title: 'Sound Recorder', icon: 'speaker', component: Placeholder },
-  { title: 'Solitaire', icon: 'solitaire', component: Placeholder },
-  { title: 'Notepad', icon: 'notepad', component: Notepad },
-  { title: 'Winamp', icon: 'winamp2', component: WinampApp },
-  { title: '3D Pipes', icon: 'pipes', component: Placeholder },
-  { title: '3D Flower Box', icon: 'pipes', component: Placeholder },
-  { title: 'MS-DOS Prompt', icon: 'msdos', component: Placeholder },
-  { title: 'Calculator', icon: 'calculator', component: Placeholder },
-  { title: 'Pinball', icon: 'pinball', component: Placeholder },
+  { title: 'My Computer', iconID: 'my-computer', component: () => <Placeholder title="My Computer" /> },
+  { title: 'My Documents', iconID: 'my-documents-folder', component: () => <Placeholder title="My Documents" /> },
+  { title: 'Network Neighborhood', iconID: 'network', component: () => <Placeholder title="Network Neighborhood" /> },
+  { title: 'Recycle Bin', iconID: 'recycle-bin', component: () => <Placeholder title="Recycle Bin" /> },
+  { title: 'My Pictures', iconID: 'folder', component: () => <Placeholder title="My Pictures" /> },
+  { title: 'Internet Explorer', iconID: 'internet-explorer', component: () => <Placeholder title="Internet Explorer" /> },
+  { title: 'Paint', iconID: 'paint', component: () => <Placeholder title="Paint" /> },
+  { title: 'Minesweeper', iconID: 'minesweeper', component: () => <Placeholder title="Minesweeper" /> },
+  { title: 'Sound Recorder', iconID: 'speaker', component: () => <Placeholder title="Sound Recorder" /> },
+  { title: 'Solitaire', iconID: 'solitaire', component: () => <Placeholder title="Solitaire" /> },
+  { title: 'Notepad', iconID: 'notepad', component: Notepad },
+  { title: 'Winamp', iconID: 'winamp2', component: () => <Placeholder title="Winamp" /> },
+  { title: '3D Pipes', iconID: 'pipes', component: () => <Placeholder title="3D Pipes" /> },
+  { title: '3D Flower Box', iconID: 'pipes', component: () => <Placeholder title="3D Flower Box" /> },
+  { title: 'MS-DOS Prompt', iconID: 'msdos', component: () => <Placeholder title="MS-DOS Prompt" /> },
+  { title: 'Calculator', iconID: 'calculator', component: () => <Placeholder title="Calculator" /> },
+  { title: 'Pinball', iconID: 'pinball', component: () => <Placeholder title="Pinball" /> },
 ];

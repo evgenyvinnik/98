@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { styles } from './Window.styles';
 import TitleBar from './TitleBar';
+import MenuBar, { type MenuBarDef } from '../MenuBar/MenuBar';
 import { useThreeDeeFun } from '../../contexts/ThreeDeeFunContext';
 import { useVisualizerOverlay } from '../../contexts/VisualizerContext';
 
@@ -22,6 +23,7 @@ interface WindowProps {
   onMinimize: () => void;
   onMaximize: () => void;
   onRestore: () => void;
+  menus?: MenuBarDef;
 }
 
 const Window: React.FC<WindowProps> = ({
@@ -40,7 +42,8 @@ const Window: React.FC<WindowProps> = ({
   onDrag,
   onMinimize,
   onMaximize,
-  onRestore,
+    onRestore,
+  menus,
 }) => {
   const dragStartPos = useRef({ x: 0, y: 0 });
   const { is3DEnabled, transforms } = useThreeDeeFun();
@@ -104,6 +107,7 @@ const Window: React.FC<WindowProps> = ({
         isMaximizable={state !== 'maximized'}
         isRestorable={state === 'maximized'}
       />
+            {menus && <MenuBar menus={menus} />}
       <div {...stylex.props(styles.content)}>{children}</div>
     </div>
   );

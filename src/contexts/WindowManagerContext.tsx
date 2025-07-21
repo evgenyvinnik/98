@@ -1,8 +1,9 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { type MenuBarDef } from '../components/MenuBar/MenuBar';
 export interface AppWindow {
   id: number;
   title: string;
-  icon: string;
+  iconID: string;
   content: React.ReactNode;
   x: number;
   y: number;
@@ -13,16 +14,18 @@ export interface AppWindow {
   isResizable?: boolean;
   isMaximizable?: boolean;
   isMinimizable?: boolean;
+  menus?: MenuBarDef;
 }
 
-export type NewWindowOptions = Omit<AppWindow, 'id' | 'zIndex' | 'x' | 'y' | 'state' | 'icon'> & {
-  icon: string;
+export type NewWindowOptions = Omit<AppWindow, 'id' | 'zIndex' | 'x' | 'y' | 'state' | 'iconID'> & {
+  iconID: string;
   id?: number;
   x?: number;
   y?: number;
   isResizable?: boolean;
   isMaximizable?: boolean;
   isMinimizable?: boolean;
+  menus?: MenuBarDef;
 };
 
 interface WindowManagerContextType {

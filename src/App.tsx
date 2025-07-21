@@ -10,6 +10,7 @@ import { WindowManagerProvider, useWindowManager } from './contexts/WindowManage
 import { MessageBoxProvider } from './contexts/MessageBoxContext';
 import { ThreeDeeFunProvider } from './contexts/ThreeDeeFunContext';
 import { VisualizerProvider } from './contexts/VisualizerContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Program } from './programs.tsx';
 
 const AppContent: React.FC = () => {
@@ -22,13 +23,14 @@ const AppContent: React.FC = () => {
     setIsStartMenuOpen(prev => !prev);
   };
 
-  const handleProgramClick = (program: Program) => {
+    const handleProgramClick = (program: Program) => {
     openWindow({
       title: program.title,
       icon: program.icon,
       content: <program.component />,
       width: 500,
       height: 400,
+      menus: program.menus,
     });
     setIsStartMenuOpen(false);
   };
@@ -76,8 +78,9 @@ const AppContent: React.FC = () => {
         .sort((a, b) => a.zIndex - b.zIndex)
         .map(win => (
           <Window
-            key={win.id}
+                        key={win.id}
             {...win}
+            menus={win.menus}
             isActive={win.id === activeWindowId}
             onClose={() => closeWindow(win.id)}
             onFocus={() => focusWindow(win.id)}
@@ -109,15 +112,17 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <WindowManagerProvider>
-      <MessageBoxProvider>
-        <ThreeDeeFunProvider>
-          <VisualizerProvider>
-            <AppContent />
-          </VisualizerProvider>
-        </ThreeDeeFunProvider>
-      </MessageBoxProvider>
-    </WindowManagerProvider>
+        <ThemeProvider>
+      <WindowManagerProvider>
+        <MessageBoxProvider>
+          <ThreeDeeFunProvider>
+            <VisualizerProvider>
+              <AppContent />
+            </VisualizerProvider>
+          </ThreeDeeFunProvider>
+        </MessageBoxProvider>
+      </WindowManagerProvider>
+    </ThemeProvider>
   );
 };
 
