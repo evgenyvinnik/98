@@ -31,7 +31,7 @@ export function get(label: string): string | null {
 export function toText(label: string): string {
   const index = indexOf(label);
   if (index >= 0) {
-    return unescape(label.substring(0, index)) + unescape(label.substring(index + 1));
+    return unescape(label.substring(0, index) + label.substring(index + 1));
   }
   return unescape(label);
 }

@@ -7,13 +7,13 @@ export const styles = stylex.create({
     justifyContent: 'space-between',
     padding: '2px',
     height: '18px',
-    background: 'linear-gradient(to right, var(--inactive-title), var(--gradient-inactive-title))',
+    backgroundImage: 'linear-gradient(to right, var(--inactive-title), var(--gradient-inactive-title))',
     color: 'var(--inactive-title-text)',
     fontWeight: 'bold',
     userSelect: 'none',
   },
   active: {
-    background: 'linear-gradient(to right, var(--active-title), var(--gradient-active-title))',
+    backgroundImage: 'linear-gradient(to right, var(--active-title), var(--gradient-active-title))',
     color: 'var(--title-text)',
   },
   title: {
