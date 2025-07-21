@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { styles } from './Desktop.styles.ts';
 import DesktopIcon from '../DesktopIcon/DesktopIcon';
 import { getIconUrl, Stats } from './icon-helpers';
+
+const styles = stylex.create({
+  desktop: {
+    backgroundImage: 'url(/images/clouds.jpg)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    height: '100vh',
+    width: '100vw',
+  },
+});
 
 declare const BrowserFS: any; // Assuming BrowserFS is loaded globally
 

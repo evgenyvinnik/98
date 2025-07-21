@@ -1,7 +1,78 @@
 import React from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { styles } from './Taskbar.styles.ts';
 import TaskbarButton from '../TaskbarButton/TaskbarButton';
+
+const styles = stylex.create({
+  taskbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '28px',
+    backgroundColor: 'var(--ButtonFace)',
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: 'var(--ButtonHilight)',
+    borderLeftWidth: '1px',
+    borderLeftStyle: 'solid',
+    borderLeftColor: 'var(--ButtonHilight)',
+    borderRightWidth: '1px',
+    borderRightStyle: 'solid',
+    borderRightColor: 'var(--ButtonHilight)',
+    borderBottomWidth: '1px',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--ButtonShadow)',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 4px',
+    zIndex: 5000,
+  },
+  startButton: {
+    height: '22px',
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    borderTopColor: 'var(--ButtonLight)',
+    borderRightColor: 'var(--ButtonShadow)',
+    borderBottomColor: 'var(--ButtonShadow)',
+    borderLeftColor: 'var(--ButtonLight)',
+    boxShadow: '1px 1px 0px black',
+    backgroundColor: 'var(--ButtonFace)',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 6px',
+    marginRight: '4px',
+    fontWeight: 'bold',
+  },
+  startIcon: {
+    width: '16px',
+    height: '16px',
+    marginRight: '4px',
+  },
+  divider: {
+    width: '1px',
+    height: '22px',
+    backgroundColor: 'var(--ButtonShadow)',
+    borderRightWidth: '1px',
+    borderRightStyle: 'solid',
+    borderRightColor: 'var(--ButtonHilight)',
+    margin: '0 4px',
+  },
+  tasks: {
+    flexGrow: 1,
+  },
+  tray: {
+    display: 'flex',
+    alignItems: 'center',
+    height: '100%',
+    borderWidth: '2px',
+    borderStyle: 'inset',
+    borderColor: '#fff',
+    padding: '0 4px',
+  },
+  time: {
+    fontSize: '12px',
+  },
+});
 
 interface AppWindow {
   id: number;
