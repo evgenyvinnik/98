@@ -1,20 +1,5 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- *
- */
-
-const babelConfig = require('./babel.config.cjs');
-
 module.exports = {
   plugins: {
-    '@stylexjs/postcss-plugin': {
-      include: ['src/**/*.{js,jsx,ts,tsx}'],
-      useCSSLayers: true,
-      babelConfig,
-    },
+    autoprefixer: {},
   },
 };

@@ -6,23 +6,25 @@
  *
  *
  */
+
 module.exports = {
-    presets: [['@babel/preset-react', { runtime: 'automatic' }]],
-    plugins: [
-      ['@babel/plugin-syntax-typescript', { isTSX: true }],
-      [
-        '@stylexjs/babel-plugin',
-        {
-          dev: process.env.NODE_ENV === 'development',
-          runtimeInjection: false,
-          genConditionalClasses: true,
-          treeshakeCompensation: true,
-          unstable_moduleResolution: {
-            type: 'commonJS',
-            rootDir: __dirname,
-          },
+  presets: [
+    '@babel/preset-env',
+    ['@babel/preset-react', { runtime: 'automatic' }],
+    '@babel/preset-typescript',
+  ],
+  plugins: [
+    [
+      '@stylexjs/babel-plugin',
+      {
+        dev: process.env.NODE_ENV === 'development',
+        genConditionalClasses: true,
+        treeshakeCompensation: true,
+        unstable_moduleResolution: {
+          type: 'commonJS',
+          rootDir: __dirname,
         },
-      ],
+      },
     ],
-  };
-  
+  ],
+};
