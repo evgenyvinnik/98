@@ -9,6 +9,7 @@ import WindowSwitcher from './components/WindowSwitcher/WindowSwitcher';
 import { WindowManagerProvider, useWindowManager } from './contexts/WindowManagerContext';
 import { MessageBoxProvider } from './contexts/MessageBoxContext';
 import { ThreeDeeFunProvider } from './contexts/ThreeDeeFunContext';
+import { VisualizerProvider } from './contexts/VisualizerContext';
 import { Program } from './programs.tsx';
 
 const AppContent: React.FC = () => {
@@ -111,7 +112,9 @@ const App: React.FC = () => {
     <WindowManagerProvider>
       <MessageBoxProvider>
         <ThreeDeeFunProvider>
-          <AppContent />
+          <VisualizerProvider>
+            <AppContent />
+          </VisualizerProvider>
         </ThreeDeeFunProvider>
       </MessageBoxProvider>
     </WindowManagerProvider>

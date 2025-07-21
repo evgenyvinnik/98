@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { styles } from './Window.styles';
 import TitleBar from './TitleBar';
 import { useThreeDeeFun } from '../../contexts/ThreeDeeFunContext';
+import { useVisualizerOverlay } from '../../contexts/VisualizerContext';
 
 interface WindowProps {
   id: number;
@@ -43,6 +44,7 @@ const Window: React.FC<WindowProps> = ({
 }) => {
   const dragStartPos = useRef({ x: 0, y: 0 });
   const { is3DEnabled, transforms } = useThreeDeeFun();
+  const visualizerRef = useVisualizerOverlay(true); // Always enabled for now
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('.title-bar-button')) {
@@ -82,6 +84,7 @@ const Window: React.FC<WindowProps> = ({
 
   return (
     <div
+      ref={visualizerRef}
       {...stylex.props(
         styles.window,
         state === 'maximized' && styles.maximized,
