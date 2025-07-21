@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { styles } from './Desktop.styles';
 import DesktopIcon from '../DesktopIcon/DesktopIcon';
+import { getIconUrl, Stats } from './icon-helpers';
 
 declare const BrowserFS: any; // Assuming BrowserFS is loaded globally
 
@@ -21,17 +22,30 @@ const Desktop: React.FC = () => {
           return;
         }
         const fs = BrowserFS.BFSRequire('fs');
-        fs.readdir('/desktop/', (err: Error | null, files: string[]) => {
+        const desktopPath = '/desktop/';
+
+        fs.readdir(desktopPath, (err: Error | null, files: string[]) => {
           if (err) {
             console.error('Error reading desktop directory:', err);
             return;
           }
-          // TODO: Get proper icons for each file type
-          const desktopItems = files.map(file => ({
-            name: file,
-            iconUrl: '/images/icons/file-32x32.png', // Placeholder icon
-          }));
-          setItems(desktopItems);
+
+          const promises = files.map(file => 
+            new Promise<DesktopItem>((resolve, reject) => {
+              const filePath = `${desktopPath}${file}`;
+              fs.stat(filePath, (err: Error | null, stats: Stats) => {
+                if (err) {
+                  console.error(`Error getting stats for ${filePath}:`, err);
+                  // Resolve with a default item on error
+                  resolve({ name: file, iconUrl: getIconUrl(file, { isDirectory: () => false }, 32) });
+                  return;
+                }
+                resolve({ name: file, iconUrl: getIconUrl(file, stats, 32) });
+              });
+            })
+          );
+
+          Promise.all(promises).then(setItems);
         });
       });
     };
