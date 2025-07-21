@@ -3,7 +3,7 @@ import { type MenuBarDef } from '../components/MenuBar/MenuBar';
 export interface AppWindow {
   id: number;
   title: string;
-  iconID: string;
+  icon: string;
   content: React.ReactNode;
   x: number;
   y: number;
@@ -17,8 +17,8 @@ export interface AppWindow {
   menus?: MenuBarDef;
 }
 
-export type NewWindowOptions = Omit<AppWindow, 'id' | 'zIndex' | 'x' | 'y' | 'state' | 'iconID'> & {
-  iconID: string;
+export type NewWindowOptions = Omit<AppWindow, 'id' | 'zIndex' | 'x' | 'y' | 'state' | 'icon'> & {
+  icon: string;
   id?: number;
   x?: number;
   y?: number;

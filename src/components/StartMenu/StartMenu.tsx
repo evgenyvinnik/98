@@ -1,6 +1,6 @@
 import React from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { type Program } from '../../programs.tsx';
+import { programs, Program } from '../../programs.tsx';
 import { getIconUrl } from '../Desktop/icon-helpers';
 
 const styles = stylex.create({
@@ -61,11 +61,10 @@ const styles = stylex.create({
 
 interface StartMenuProps {
   isOpen: boolean;
-  programs: Program[];
   onProgramClick: (program: Program) => void;
 }
 
-const StartMenu: React.FC<StartMenuProps> = ({ isOpen, programs, onProgramClick }) => {
+const StartMenu: React.FC<StartMenuProps> = ({ isOpen, onProgramClick }) => {
   if (!isOpen) {
     return null;
   }
@@ -78,7 +77,7 @@ const StartMenu: React.FC<StartMenuProps> = ({ isOpen, programs, onProgramClick 
       <ul {...stylex.props(styles.programsList)}>
         {programs.map(program => (
           <li key={program.title} {...stylex.props(styles.programItem)} onClick={() => onProgramClick(program)}>
-            <img src={getIconUrl(program.iconID, { isDirectory: () => false }, 16)} alt={program.title} {...stylex.props(styles.programIcon)} />
+            <img src={getIconUrl(program.icon, { isDirectory: () => false }, 16)} alt={program.title} {...stylex.props(styles.programIcon)} />
             <span>{program.title}</span>
           </li>
         ))}
