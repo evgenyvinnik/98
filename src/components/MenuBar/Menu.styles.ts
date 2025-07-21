@@ -8,7 +8,7 @@ export const styles = stylex.create({
         borderWidth: '1px',
     borderStyle: 'solid',
     borderColor: 'transparent',
-    background: 'none',
+    backgroundColor: 'transparent',
     color: 'var(--menu-text)',
     padding: '2px 6px',
     outline: 'none',
