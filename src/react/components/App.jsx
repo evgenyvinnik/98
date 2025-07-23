@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Desktop from './Desktop';
 import Taskbar from './Taskbar';
+import WindowSwitcher from './WindowSwitcher';
 import { WindowsProvider } from '../context/WindowsContext';
+import { MessageBoxProvider } from './MessageBox';
+import { TaskList, createTaskBridge } from './Task';
+import { createMessageBoxBridge } from './MessageBox';
+import { createWindowSwitcherBridge } from './WindowSwitcher';
+import { createStartMenuBridge } from './StartMenu';
 
 /**
  * Main App component that serves as the entry point for the React version
@@ -10,20 +16,40 @@ import { WindowsProvider } from '../context/WindowsContext';
  */
 const App = () => {
   const [initialized, setInitialized] = useState(false);
+  const [windowSwitcherVisible, setWindowSwitcherVisible] = useState(false);
 
   useEffect(() => {
     // This effect will run once when the component mounts
     // We can use it to initialize any resources or load data
     console.log('React Windows 98 simulation initialized');
+    
+    // Create bridges between React and jQuery components
+    createTaskBridge();
+    createMessageBoxBridge();
+    createWindowSwitcherBridge();
+    createStartMenuBridge();
+    
+    // Register React functions with the global scope
+    window.reactShowWindowSwitcher = (cycleBackwards) => {
+      setWindowSwitcherVisible(true);
+    };
+    
+    window.reactWindowSwitcherCancel = () => {
+      setWindowSwitcherVisible(false);
+    };
+    
     setInitialized(true);
   }, []);
 
   return (
     <WindowsProvider>
-      <div className="react-win98-app">
-        <Desktop />
-        <Taskbar />
-      </div>
+      <MessageBoxProvider>
+        <div className="react-win98-app">
+          <Desktop />
+          <Taskbar />
+          {windowSwitcherVisible && <WindowSwitcher />}
+        </div>
+      </MessageBoxProvider>
     </WindowsProvider>
   );
 };

@@ -6,10 +6,18 @@
  */
 
 import { initReactApp } from './index';
-import { initializeReactApplication, patchTaskSystem, registerReactProgram } from './init';
+import { initializeReactApplication, registerReactProgram } from './init';
 
 // Import our React program components
 import Notepad from './components/programs/Notepad';
+import Paint from './components/programs/Paint';
+import Calculator from './components/programs/Calculator';
+
+// Import our React core components
+import { createTaskBridge } from './components/Task';
+import { createMessageBoxBridge } from './components/MessageBox';
+import { createWindowSwitcherBridge } from './components/WindowSwitcher';
+import { createStartMenuBridge } from './components/StartMenu';
 
 /**
  * Initialize the React application within a container element
@@ -70,6 +78,8 @@ export function registerBridgeFunctions() {
 // Register our React program components
 function registerReactPrograms() {
   registerReactProgram('Notepad', Notepad);
+  registerReactProgram('Paint', Paint);
+  registerReactProgram('Calculator', Calculator);
   // Add more programs as they are migrated to React
 }
 
@@ -77,17 +87,29 @@ function registerReactPrograms() {
 function initWhenReady() {
   if (document.readyState === 'complete') {
     initializeReactApplication();
-    patchTaskSystem();
     registerBridgeFunctions();
     registerReactPrograms();
+    initializeBridges();
   } else {
     window.addEventListener('load', () => {
       initializeReactApplication();
-      patchTaskSystem();
       registerBridgeFunctions();
       registerReactPrograms();
+      initializeBridges();
     });
   }
+}
+
+/**
+ * Initialize all bridges between React and jQuery components
+ */
+function initializeBridges() {
+  createTaskBridge();
+  createMessageBoxBridge();
+  createWindowSwitcherBridge();
+  createStartMenuBridge();
+  
+  console.log('All React bridges initialized');
 }
 
 // Start initialization
