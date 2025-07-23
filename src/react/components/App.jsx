@@ -4,6 +4,7 @@ import Taskbar from './Taskbar';
 import WindowSwitcher from './WindowSwitcher';
 import { WindowsProvider } from '../context/WindowsContext';
 import { MessageBoxProvider } from './MessageBox';
+import { FileDialogProvider } from '../context/FileDialogContext';
 import { TaskList, createTaskBridge } from './Task';
 import { createMessageBoxBridge } from './MessageBox';
 import { createWindowSwitcherBridge } from './WindowSwitcher';
@@ -44,11 +45,13 @@ const App = () => {
   return (
     <WindowsProvider>
       <MessageBoxProvider>
-        <div className="react-win98-app">
-          <Desktop />
-          <Taskbar />
-          {windowSwitcherVisible && <WindowSwitcher />}
-        </div>
+        <FileDialogProvider>
+          <div className="react-win98-app">
+            <Desktop />
+            <Taskbar />
+            {windowSwitcherVisible && <WindowSwitcher />}
+          </div>
+        </FileDialogProvider>
       </MessageBoxProvider>
     </WindowsProvider>
   );

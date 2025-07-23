@@ -12,6 +12,8 @@ import { initializeReactApplication, registerReactProgram } from './init';
 import Notepad from './components/programs/Notepad';
 import Paint from './components/programs/Paint';
 import Calculator from './components/programs/Calculator';
+import Minesweeper from './components/programs/Minesweeper';
+import SoundRecorder from './components/programs/SoundRecorder';
 
 // Import our React core components
 import { createTaskBridge } from './components/Task';
@@ -80,6 +82,8 @@ function registerReactPrograms() {
   registerReactProgram('Notepad', Notepad);
   registerReactProgram('Paint', Paint);
   registerReactProgram('Calculator', Calculator);
+  registerReactProgram('Minesweeper', Minesweeper);
+  registerReactProgram('SoundRecorder', SoundRecorder);
   // Add more programs as they are migrated to React
 }
 

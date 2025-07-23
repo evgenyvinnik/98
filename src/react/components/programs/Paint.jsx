@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import useFilesystem from '../../hooks/useFilesystem';
+import { useFileDialog } from '../../context/FileDialogContext';
 
 /**
  * Paint component that implements a simple drawing application
@@ -7,6 +8,7 @@ import useFilesystem from '../../hooks/useFilesystem';
  */
 const Paint = ({ filePath }) => {
   const [fileName, setFileName] = useState(filePath ? filePath.split('/').pop() : 'untitled');
+  const [currentFilePath, setCurrentFilePath] = useState(filePath || null);
   const [isModified, setIsModified] = useState(false);
   const [tool, setTool] = useState('pencil');
   const [color, setColor] = useState('#000000');
@@ -17,6 +19,7 @@ const Paint = ({ filePath }) => {
   const isDrawing = useRef(false);
   
   const filesystem = useFilesystem();
+  const fileDialog = useFileDialog();
   
   // Initialize canvas
   useEffect(() => {
@@ -63,7 +66,10 @@ const Paint = ({ filePath }) => {
         
         context.drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
+        setFileName(path.split('/').pop());
+        setCurrentFilePath(path);
         setIsModified(false);
+        console.log(`Loaded image: ${path}`);
       };
       img.src = url;
     } catch (error) {
@@ -71,8 +77,28 @@ const Paint = ({ filePath }) => {
     }
   };
   
+  // Handle Open menu action
+  const handleOpen = async () => {
+    try {
+      // Show the open file dialog
+      const path = await fileDialog.showOpenDialog({
+        title: 'Open Image',
+        initialPath: '/my-pictures',
+        fileTypes: ['.png', '.jpg', '.jpeg', '.gif']
+      });
+      
+      // Load the selected file
+      if (path) {
+        loadImage(path);
+      }
+    } catch (error) {
+      // User canceled the dialog
+      console.log('Open dialog canceled');
+    }
+  };
+  
   // Save image to file
-  const saveImage = async () => {
+  const saveImage = async (path) => {
     if (!filesystem.isReady) return;
     
     try {
@@ -88,10 +114,44 @@ const Paint = ({ filePath }) => {
       }
       
       // Save the file
-      await filesystem.writeFile(filePath || `/my-pictures/${fileName}.png`, bytes, { encoding: 'binary' });
+      await filesystem.writeFile(path, bytes, { encoding: 'binary' });
+      setFileName(path.split('/').pop());
+      setCurrentFilePath(path);
       setIsModified(false);
+      console.log(`Saved image: ${path}`);
     } catch (error) {
       console.error('Error saving image:', error);
+    }
+  };
+  
+  // Handle Save menu action
+  const handleSave = async () => {
+    if (currentFilePath) {
+      // Save to the current file path
+      await saveImage(currentFilePath);
+    } else {
+      // Show the save file dialog
+      await handleSaveAs();
+    }
+  };
+  
+  // Handle Save As menu action
+  const handleSaveAs = async () => {
+    try {
+      // Show the save file dialog
+      const path = await fileDialog.showSaveDialog({
+        title: 'Save Image As',
+        initialPath: '/my-pictures',
+        fileTypes: ['.png']
+      });
+      
+      // Save to the selected path
+      if (path) {
+        await saveImage(path);
+      }
+    } catch (error) {
+      // User canceled the dialog
+      console.log('Save dialog canceled');
     }
   };
   
@@ -150,13 +210,40 @@ const Paint = ({ filePath }) => {
         display: 'flex', 
         backgroundColor: '#c0c0c0',
         borderBottom: '1px solid #808080',
-        padding: '2px'
+        padding: '2px',
+        marginBottom: '10px'
       }}>
-        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer' }}>File</div>
-        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer' }}>Edit</div>
-        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer' }}>View</div>
-        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer' }}>Image</div>
-        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer' }}>Help</div>
+        <div className="menu-item" style={{ 
+          marginRight: '8px', 
+          cursor: 'pointer',
+          position: 'relative',
+          padding: '2px 5px'
+        }}>
+          File
+          <div className="menu-dropdown" style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            backgroundColor: '#c0c0c0',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: '#ffffff #808080 #808080 #ffffff',
+            padding: '2px',
+            width: '150px',
+            display: 'none',
+            zIndex: 1000
+          }}>
+            <div className="menu-item" onClick={handleOpen} style={{ padding: '2px 5px', cursor: 'pointer' }}>Open...</div>
+            <div className="menu-item" onClick={handleSave} style={{ padding: '2px 5px', cursor: 'pointer' }}>Save</div>
+            <div className="menu-item" onClick={handleSaveAs} style={{ padding: '2px 5px', cursor: 'pointer' }}>Save As...</div>
+            <div style={{ height: '1px', backgroundColor: '#808080', margin: '2px 0' }}></div>
+            <div className="menu-item" style={{ padding: '2px 5px', cursor: 'pointer' }}>Exit</div>
+          </div>
+        </div>
+        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer', padding: '2px 5px' }}>Edit</div>
+        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer', padding: '2px 5px' }}>View</div>
+        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer', padding: '2px 5px' }}>Image</div>
+        <div className="menu-item" style={{ marginRight: '8px', cursor: 'pointer', padding: '2px 5px' }}>Help</div>
       </div>
       
       {/* Toolbar */}
@@ -236,10 +323,12 @@ const Paint = ({ filePath }) => {
           <option value="10">10px</option>
         </select>
         <button 
-          onClick={saveImage} 
+          onClick={handleSave} 
           style={{ 
             backgroundColor: '#c0c0c0',
-            border: '1px solid #808080',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: '#ffffff #808080 #808080 #ffffff',
             margin: '0 2px',
             padding: '2px 4px'
           }}
