@@ -6,6 +6,10 @@
  */
 
 import { initReactApp } from './index';
+import { initializeReactApplication, patchTaskSystem, registerReactProgram } from './init';
+
+// Import our React program components
+import Notepad from './components/programs/Notepad';
 
 /**
  * Initialize the React application within a container element
@@ -60,7 +64,31 @@ export function registerBridgeFunctions() {
   window.initializeReact = initializeReact;
   window.createReactWindowFromJQuery = createReactWindowFromJQuery;
   window.createJQueryWindowFromReact = createJQueryWindowFromReact;
+  window.registerReactProgram = registerReactProgram;
 }
 
-// Register the bridge functions when this file is loaded
-registerBridgeFunctions();
+// Register our React program components
+function registerReactPrograms() {
+  registerReactProgram('Notepad', Notepad);
+  // Add more programs as they are migrated to React
+}
+
+// Initialize when the document is ready
+function initWhenReady() {
+  if (document.readyState === 'complete') {
+    initializeReactApplication();
+    patchTaskSystem();
+    registerBridgeFunctions();
+    registerReactPrograms();
+  } else {
+    window.addEventListener('load', () => {
+      initializeReactApplication();
+      patchTaskSystem();
+      registerBridgeFunctions();
+      registerReactPrograms();
+    });
+  }
+}
+
+// Start initialization
+initWhenReady();
