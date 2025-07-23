@@ -25,6 +25,9 @@
 		<link rel="prefetch" href="/programs/notepad/index.html">
 	</head>
 	<body>
+		<!-- React root container -->
+		<div id="react-root"></div>
+		<!-- Legacy desktop container -->
 		<div class="desktop" style="background-image: url(images/clouds.jpg); background-size: cover; background-position: center;"></div>
 		<div class="taskbar" style="z-index: 5000;">
 			<button class="start-button toggle" title="Click here to begin.">
@@ -72,6 +75,8 @@
 		<script src="src/window-switcher.js"></script>
 		<script src="src/visualizer-overlay.js"></script>
 		<script src="src/programs.js"></script>
+		<!-- React integration -->
+		<script type="module" src="src/react/bridge.js"></script>
 
 		<!-- TODO: DRY -->
 		<svg style="position: absolute; pointer-events: none; bottom: 100%;">
