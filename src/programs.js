@@ -1,632 +1,237 @@
-function show_help(options) {
-	const $help_window = $Window({
-		title: options.title || "Help Topics",
-		icons: iconsAtTwoSizes("chm"),
-		resizable: true,
-	})
-	$help_window.addClass("help-window");
+export const programs = [
+  {
+    id: 'notepad',
+    name: 'Notepad',
+    icon: 'notepad',
+    acceptsFilePaths: true,
+    launch: (filePath) => {
+      const documentTitle = filePath ? window.file_name_from_path(filePath) : 'Untitled';
+      const winTitle = `${documentTitle} - Notepad`;
+      const win = window.make_iframe_window({
+        src: `programs/notepad/index.html${filePath ? `?path=${filePath}` : ''}`,
+        icons: window.iconsAtTwoSizes('notepad'),
+        title: winTitle,
+        outerWidth: 480,
+        outerHeight: 321,
+        resizable: true,
+      });
+      return new window.Task(win);
+    },
+  },
+  {
+    id: 'paint',
+    name: 'Paint',
+    icon: 'paint',
+    acceptsFilePaths: true,
+    launch: (filePath) => {
+      const win = window.make_iframe_window({
+        src: 'programs/jspaint/index.html',
+        icons: window.iconsAtTwoSizes('paint'),
+        title: 'untitled - Paint',
+        outerWidth: 275,
+        outerHeight: 400,
+        minOuterWidth: 275,
+        minOuterHeight: 400,
+      });
+      // This is a placeholder for the complex system hooks logic from the original file.
+      // A full migration would require refactoring that logic to work within this new structure.
+      return new window.Task(win);
+    },
+  },
+  {
+    id: 'minesweeper',
+    name: 'Minesweeper',
+    icon: 'minesweeper',
+    launch: () => {
+      const win = window.make_iframe_window({
+        src: 'programs/minesweeper/index.html',
+        icons: window.iconsAtTwoSizes('minesweeper'),
+        title: 'Minesweeper',
+        innerWidth: 280,
+        innerHeight: 320 + 21,
+        resizable: false,
+      });
+      return new window.Task(win);
+    },
+  },
+  {
+    id: 'sound-recorder',
+    name: 'Sound Recorder',
+    icon: 'speaker',
+    acceptsFilePaths: true,
+    launch: (filePath) => {
+        const documentTitle = filePath ? window.file_name_from_path(filePath) : 'Sound';
+        const winTitle = `${documentTitle} - Sound Recorder`;
+        const win = window.make_iframe_window({
+            src: `programs/sound-recorder/index.html${filePath ? `?path=${filePath}` : ''}`,
+            icons: window.iconsAtTwoSizes('speaker'),
+            title: winTitle,
+            outerWidth: 260,
+            outerHeight: 120,
+            resizable: false,
+        });
+        return new window.Task(win);
+    },
+  },
+  {
+    id: 'webamp',
+    name: 'Webamp',
+    icon: 'winamp',
+    launch: () => {
+        const win = window.make_iframe_window({
+            src: 'programs/webamp/index.html',
+            icons: window.iconsAtTwoSizes('winamp'),
+            title: 'Webamp',
+        });
+        return new window.Task(win);
+    },
+  },
+  {
+      id: 'help',
+      name: 'Help',
+      icon: 'chm',
+      launch: (options) => {
+        // The original show_help function is complex and directly manipulates the DOM.
+        // For now, we'll call the original global function.
+        // A full migration would require refactoring show_help into a React component.
+        return window.show_help(options);
+      }
+  }
+];
 
-	let ignore_one_load = true;
-	let back_length = 0;
-	let forward_length = 0;
+export const fileAssociations = {
+  txt: 'notepad',
+  md: 'notepad',
+  js: 'notepad',
+  css: 'notepad',
+  html: 'notepad',
+  gitattributes: 'notepad',
+  gitignore: 'notepad',
+  json: 'notepad',
+  bmp: 'paint',
+  png: 'paint',
+  jpg: 'paint',
+  jpeg: 'paint',
+  gif: 'paint',
+  webp: 'paint',
+  wav: 'sound-recorder',
+  // mp3: 'webamp',
+};
 
-	const $main = $(E("div")).addClass("main");
-	const $toolbar = $(E("div")).addClass("toolbar");
-	const add_toolbar_button = (name, sprite_n, action_fn, enabled_fn) => {
-		const $button = $("<button class='lightweight'>")
-			.append($("<span>").text(name))
-			.appendTo($toolbar)
-			.on("click", () => {
-				action_fn();
-			});
-		$("<div class='icon'/>")
-			.appendTo($button)
-			.css({
-				backgroundPosition: `${-sprite_n * 55}px 0px`,
-			});
-		const update_enabled = () => {
-			$button[0].disabled = enabled_fn && !enabled_fn();
-		};
-		update_enabled();
-		$help_window.on("click", "*", update_enabled);
-		$help_window.on("update-buttons", update_enabled);
-		return $button;
-	};
-	const measure_sidebar_width = () =>
-		$contents.outerWidth() +
-		parseFloat(getComputedStyle($contents[0]).getPropertyValue("margin-left")) +
-		parseFloat(getComputedStyle($contents[0]).getPropertyValue("margin-right")) +
-		$resizer.outerWidth();
-	const $hide_button = add_toolbar_button("Hide", 0, () => {
-		const toggling_width = measure_sidebar_width();
-		$contents.hide();
-		$resizer.hide();
-		$hide_button.hide();
-		$show_button.show();
-		$help_window.width($help_window.width() - toggling_width);
-		$help_window.css("left", $help_window.offset().left + toggling_width);
-	});
-	const $show_button = add_toolbar_button("Show", 5, () => {
-		$contents.show();
-		$resizer.show();
-		$show_button.hide();
-		$hide_button.show();
-		const toggling_width = measure_sidebar_width();
-		$help_window.width($help_window.width() + toggling_width);
-		$help_window.css("left", $help_window.offset().left - toggling_width);
-		// $help_window.applyBounds() would push the window to fit (before trimming it only if needed)
-		// Trim the window to fit (especially for if maximized)
-		if ($help_window.offset().left < 0) {
-			$help_window.width($help_window.width() + $help_window.offset().left);
-			$help_window.css("left", 0);
-		}
-	}).hide();
-	add_toolbar_button("Back", 1, () => {
-		$iframe[0].contentWindow.history.back();
-		ignore_one_load = true;
-		back_length -= 1;
-		forward_length += 1;
-	}, () => back_length > 0);
-	add_toolbar_button("Forward", 2, () => {
-		$iframe[0].contentWindow.history.forward();
-		ignore_one_load = true;
-		forward_length -= 1;
-		back_length += 1;
-	}, () => forward_length > 0);
-	add_toolbar_button("Options", 3, () => { }, () => false); // TODO: access key &O
-	add_toolbar_button("Web Help", 4, () => {
-		iframe.src = "help/online_support.htm";
-	});
+// The original show_help function is complex and heavily relies on jQuery and direct DOM manipulation.
+// A full migration would require a significant rewrite into a React component.
+// For now, we'll keep it available as a global function to ensure the help system doesn't break.
+window.show_help = function(options) {
+    const $help_window = window.$Window({
+        title: options.title || "Help Topics",
+        icons: window.iconsAtTwoSizes("chm"),
+        resizable: true,
+    })
+    $help_window.addClass("help-window");
 
-	const $iframe = $("<iframe sandbox='allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-downloads'>")
-		.attr({ src: "help/default.html" })
-		.addClass("inset-deep");
-	const iframe = $iframe[0];
-	enhance_iframe(iframe);
-	iframe.$window = $help_window; // for focus handling integration
-	const $resizer = $(E("div")).addClass("resizer");
-	const $contents = $(E("ul")).addClass("contents inset-deep");
+    let ignore_one_load = true;
+    let back_length = 0;
+    let forward_length = 0;
 
-	// TODO: fix race conditions
-	$iframe.on("load", () => {
-		if (!ignore_one_load) {
-			back_length += 1;
-			forward_length = 0;
-		}
-		iframe.contentWindow.location.href
-		ignore_one_load = false;
-		$help_window.triggerHandler("update-buttons");
-	});
+    const $main = window.$("<div>").addClass("main");
+    const $toolbar = window.$("<div>").addClass("toolbar");
+    const add_toolbar_button = (name, sprite_n, action_fn, enabled_fn) => {
+        const $button = window.$("<button class='lightweight'>")
+            .append(window.$("<span>").text(name))
+            .appendTo($toolbar)
+            .on("click", () => {
+                action_fn();
+            });
+        window.$("<div class='icon'/>")
+            .appendTo($button)
+            .css({
+                backgroundPosition: `${-sprite_n * 55}px 0px`,
+            });
+        const update_enabled = () => {
+            $button[0].disabled = enabled_fn && !enabled_fn();
+        };
+        update_enabled();
+        $help_window.on("click", "*", update_enabled);
+        $help_window.on("update-buttons", update_enabled);
+        return $button;
+    };
+    const measure_sidebar_width = () =>
+        $contents.outerWidth() +
+        parseFloat(getComputedStyle($contents[0]).getPropertyValue("margin-left")) +
+        parseFloat(getComputedStyle($contents[0]).getPropertyValue("margin-right")) +
+        $resizer.outerWidth();
+    const $hide_button = add_toolbar_button("Hide", 0, () => {
+        const toggling_width = measure_sidebar_width();
+        $contents.hide();
+        $resizer.hide();
+        $hide_button.hide();
+        $show_button.show();
+        $help_window.width($help_window.width() - toggling_width);
+        $help_window.css("left", $help_window.offset().left + toggling_width);
+    });
+    const $show_button = add_toolbar_button("Show", 5, () => {
+        $contents.show();
+        $resizer.show();
+        $show_button.hide();
+        $hide_button.show();
+        const toggling_width = measure_sidebar_width();
+        $help_window.width($help_window.width() + toggling_width);
+        $help_window.css("left", $help_window.offset().left - toggling_width);
+        if ($help_window.offset().left < 0) {
+            $help_window.width($help_window.width() + $help_window.offset().left);
+            $help_window.css("left", 0);
+        }
+    }).hide();
+    add_toolbar_button("Back", 1, () => {
+        $iframe[0].contentWindow.history.back();
+        ignore_one_load = true;
+        back_length -= 1;
+        forward_length += 1;
+    }, () => back_length > 0);
+    add_toolbar_button("Forward", 2, () => {
+        $iframe[0].contentWindow.history.forward();
+        ignore_one_load = true;
+        forward_length -= 1;
+        back_length += 1;
+    }, () => forward_length > 0);
+    add_toolbar_button("Options", 3, () => { }, () => false);
+    add_toolbar_button("Web Help", 4, () => {
+        iframe.src = "help/online_support.htm";
+    });
 
-	$main.append($contents, $resizer, $iframe);
-	$help_window.$content.append($toolbar, $main);
+    const $iframe = window.$("<iframe sandbox='allow-same-origin allow-scripts allow-forms allow-modals allow-popups allow-downloads'>")
+        .attr({ src: "help/default.html" })
+        .addClass("inset-deep");
+    const iframe = $iframe[0];
+    window.enhance_iframe(iframe);
+    iframe.$window = $help_window;
+    const $resizer = window.$("<div>").addClass("resizer");
+    const $contents = window.$("<ul>").addClass("contents inset-deep");
 
-	$help_window.css({ width: 800, height: 600 });
+    $iframe.on("load", () => {
+        if (!ignore_one_load) {
+            back_length += 1;
+            forward_length = 0;
+        }
+        ignore_one_load = false;
+        $help_window.triggerHandler("update-buttons");
+    });
 
-	$iframe.attr({ name: "help-frame" });
-	$iframe.css({
-		backgroundColor: "white",
-		border: "",
-		margin: "1px",
-	});
-	$contents.css({
-		margin: "1px",
-	});
-	$help_window.center();
+    $main.append($contents, $resizer, $iframe);
+    $help_window.$content.append($toolbar, $main);
 
-	$main.css({
-		position: "relative", // for resizer
-	});
+    $help_window.css({ width: 800, height: 600 });
 
-	const resizer_width = 4;
-	$resizer.css({
-		cursor: "ew-resize",
-		width: resizer_width,
-		boxSizing: "border-box",
-		background: "var(--ButtonFace)",
-		borderLeft: "1px solid var(--ButtonShadow)",
-		boxShadow: "inset 1px 0 0 var(--ButtonHilight)",
-		top: 0,
-		bottom: 0,
-		zIndex: 1,
-	});
-	$resizer.on("pointerdown", (e) => {
-		let pointermove, pointerup;
-		const getPos = (e) =>
-			Math.min($help_window.width() - 100, Math.max(20,
-				e.clientX - $help_window.$content.offset().left
-			));
-		$G.on("pointermove", pointermove = (e) => {
-			$resizer.css({
-				position: "absolute",
-				left: getPos(e)
-			});
-			$contents.css({
-				marginRight: resizer_width,
-			});
-		});
-		$G.on("pointerup", pointerup = (e) => {
-			$G.off("pointermove", pointermove);
-			$G.off("pointerup", pointerup);
-			$resizer.css({
-				position: "",
-				left: ""
-			});
-			$contents.css({
-				flexBasis: getPos(e) - resizer_width,
-				marginRight: "",
-			});
-		});
-	});
-
-	const parse_object_params = $object => {
-		// parse an $(<object>) to a plain object of key value pairs
-		const object = {};
-		for (const param of $object.children("param").get()) {
-			object[param.name] = param.value;
-		}
-		return object;
-	};
-
-	let $last_expanded;
-
-	const make_$item = text => {
-		const $item = $(E("div")).addClass("item").text(text);
-		$item.on("mousedown", () => {
-			$contents.find(".item").removeClass("selected");
-			$item.addClass("selected");
-		});
-		$item.on("click", () => {
-			const $li = $item.parent();
-			if ($li.is(".folder")) {
-				if ($last_expanded) {
-					$last_expanded.not($li).removeClass("expanded");
-				}
-				$li.toggleClass("expanded");
-				$last_expanded = $li;
-			}
-		});
-		return $item;
-	};
-
-	const $default_item_li = $(E("li")).addClass("page");
-	$default_item_li.append(make_$item("Welcome to Help").on("click", () => {
-		$iframe.attr({ src: "help/default.html" });
-	}));
-	$contents.append($default_item_li);
-
-	function renderItemFromContents(source_li, $folder_items_ul) {
-		const object = parse_object_params($(source_li).children("object"));
-		if ($(source_li).find("li").length > 0) {
-
-			const $folder_li = $(E("li")).addClass("folder");
-			$folder_li.append(make_$item(object.Name));
-			$contents.append($folder_li);
-
-			const $folder_items_ul = $(E("ul"));
-			$folder_li.append($folder_items_ul);
-
-			$(source_li).children("ul").children().get().forEach((li) => {
-				renderItemFromContents(li, $folder_items_ul);
-			});
-		} else {
-			const $item_li = $(E("li")).addClass("page");
-			$item_li.append(make_$item(object.Name).on("click", () => {
-				$iframe.attr({ src: `${options.root}/${object.Local}` });
-			}));
-			if ($folder_items_ul) {
-				$folder_items_ul.append($item_li);
-			} else {
-				$contents.append($item_li);
-			}
-		}
-	}
-
-	$.get(options.contentsFile, hhc => {
-		$($.parseHTML(hhc)).filter("ul").children().get().forEach((li) => {
-			renderItemFromContents(li, null);
-		});
-	});
-
-	// @TODO: keyboard accessability
-	// $help_window.on("keydown", (e)=> {
-	// 	switch(e.keyCode){
-	// 		case 37:
-	// 			show_error_message("MOVE IT");
-	// 			break;
-	// 	}
-	// });
-	var task = new Task($help_window);
-	task.$help_window = $help_window;
-	return task;
-}
-
-function Notepad(file_path) {
-	// TODO: DRY the default file names and title code (use document.title of the page in the iframe, in make_iframe_window)
-	var document_title = file_path ? file_name_from_path(file_path) : "Untitled";
-	var win_title = document_title + " - Notepad";
-	// TODO: focus existing window if file is currently open?
-
-	var $win = make_iframe_window({
-		src: "programs/notepad/index.html" + (file_path ? ("?path=" + file_path) : ""),
-		icons: iconsAtTwoSizes("notepad"),
-		title: win_title,
-		outerWidth: 480,
-		outerHeight: 321,
-		resizable: true,
-	});
-	return new Task($win);
-}
-Notepad.acceptsFilePaths = true;
-
-function Paint(file_path) {
-	var $win = make_iframe_window({
-		src: "programs/jspaint/index.html",
-		icons: iconsAtTwoSizes("paint"),
-		// NOTE: in Windows 98, "untitled" is lowercase, but TODO: we should just make it consistent
-		title: "untitled - Paint",
-		outerWidth: 275,
-		outerHeight: 400,
-		minOuterWidth: 275,
-		minOuterHeight: 400,
-	});
-
-	var contentWindow = $win.$iframe[0].contentWindow;
-
-	var waitUntil = function (test, interval, callback) {
-		if (test()) {
-			callback();
-		} else {
-			setTimeout(waitUntil, interval, test, interval, callback);
-		}
-	};
-
-	const systemHooks = {
-		readBlobFromHandle: (file_path) => {
-			return new Promise((resolve, reject) => {
-				withFilesystem(() => {
-					var fs = BrowserFS.BFSRequire("fs");
-					fs.readFile(file_path, (err, buffer) => {
-						if (err) {
-							return reject(err);
-						}
-						const byte_array = new Uint8Array(buffer);
-						const blob = new Blob([byte_array]);
-						const file_name = file_path.replace(/.*\//g, "");
-						const file = new File([blob], file_name);
-						resolve(file);
-					});
-				});
-			});
-		},
-		writeBlobToHandle: async (file_path, blob) => {
-			const arrayBuffer = await blob.arrayBuffer();
-			return new Promise((resolve, reject) => {
-				withFilesystem(()=> {
-					const fs = BrowserFS.BFSRequire("fs");
-					const { Buffer } = BrowserFS.BFSRequire("buffer");
-					const buffer = Buffer.from(arrayBuffer);
-					fs.writeFile(file_path, buffer, (err)=> {
-						if (err) {
-							return reject(err);
-						}
-						resolve();
-					});
-				});
-			});
-		},
-		setWallpaperCentered: (canvas) => {
-			canvas.toBlob((blob) => {
-				setDesktopWallpaper(blob, "no-repeat", true);
-			});
-		},
-		setWallpaperTiled: (canvas) => {
-			canvas.toBlob((blob) => {
-				setDesktopWallpaper(blob, "repeat", true);
-			});
-		},
-	};
-
-	// it seems like I should be able to use onload here, but when it works (overrides the function),
-	// it for some reason *breaks the scrollbar styling* in jspaint
-	// I don't know what's going on there
-
-	// contentWindow.addEventListener("load", function(){
-	// $(contentWindow).on("load", function(){
-	// $win.$iframe.load(function(){
-	// $win.$iframe[0].addEventListener("load", function(){
-	waitUntil(()=> contentWindow.systemHooks, 500, ()=> {
-		Object.assign(contentWindow.systemHooks, systemHooks);
-
-		let $help_window;
-		contentWindow.show_help = () => {
-			if ($help_window) {
-				$help_window.focus();
-				return;
-			}
-			$help_window = show_help({
-				title: "Paint Help",
-				contentsFile: "programs/jspaint/help/mspaint.hhc",
-				root: "programs/jspaint/help",
-			}).$help_window;
-			$help_window.on("close", () => {
-				$help_window = null;
-			});
-		};
-
-		if (file_path) {
-			// window.initial_system_file_handle = ...; is too late to set this here
-			// contentWindow.open_from_file_handle(...); doesn't exist
-			systemHooks.readBlobFromHandle(file_path).then(file => {
-				if (file) {
-					contentWindow.open_from_file(file, file_path);
-				}
-			}, (error) => {
-				// this handler may not always called for errors, sometimes error message is shown via readBlobFromHandle
-				contentWindow.show_error_message(`Failed to open file ${file_path}`, error);
-			});
-		}
-
-		var old_update_title = contentWindow.update_title;
-		contentWindow.update_title = () => {
-			old_update_title();
-			$win.title(contentWindow.document.title);
-		};
-	});
-
-	return new Task($win);
-}
-Paint.acceptsFilePaths = true;
-
-function Minesweeper() {
-	var $win = make_iframe_window({
-		src: "programs/minesweeper/index.html",
-		icons: iconsAtTwoSizes("minesweeper"),
-		title: "Minesweeper",
-		innerWidth: 280,
-		innerHeight: 320 + 21,
-		resizable: false,
-	});
-	return new Task($win);
-}
-
-function SoundRecorder(file_path) {
-	// TODO: DRY the default file names and title code (use document.title of the page in the iframe, in make_iframe_window)
-	var document_title = file_path ? file_name_from_path(file_path) : "Sound";
-	var win_title = document_title + " - Sound Recorder";
-	// TODO: focus existing window if file is currently open?
-	var $win = make_iframe_window({
-		src: "programs/sound-recorder/index.html" + (file_path ? ("?path=" + file_path) : ""),
-		icons: iconsAtTwoSizes("speaker"),
-		title: win_title,
-		innerWidth: 270,
-		innerHeight: 108 + 21,
-		minInnerWidth: 270,
-		minInnerHeight: 108 + 21,
-	});
-	return new Task($win);
-}
-SoundRecorder.acceptsFilePaths = true;
-
-function Solitaire() {
-	var $win = make_iframe_window({
-		src: "programs/js-solitaire/index.html",
-		icons: iconsAtTwoSizes("solitaire"),
-		title: "Solitaire",
-		innerWidth: 585,
-		innerHeight: 384 + 21,
-	});
-	return new Task($win);
-}
-
-function showScreensaver(iframeSrc) {
-	const mouseDistanceToExit = 15;
-	const $iframe = $("<iframe>").attr("src", iframeSrc);
-	const $surface = $("<div>"); // interact to close
-	$surface.css({
-		position: "fixed",
-		left: 0,
-		top: 0,
-		width: "100%",
-		height: "100%",
-		zIndex: $Window.Z_INDEX + 10000,
-		cursor: "none",
-		touchAction: "none",
-	});
-	$iframe.css({
-		position: "fixed",
-		left: 0,
-		top: 0,
-		width: "100%",
-		height: "100%",
-		zIndex: $Window.Z_INDEX + 9999,
-		border: 0,
-		pointerEvents: "none",
-		backgroundColor: "black",
-	});
-	$surface.appendTo("body");
-	$iframe.appendTo("body");
-	const cleanUp = () => {
-		$surface.remove();
-		$iframe.remove();
-		const prevent = (event) => {
-			event.preventDefault();
-		};
-		$(window).on("contextmenu", prevent);
-		setTimeout(() => {
-			$(window).off("contextmenu", prevent);
-			window.removeEventListener("keydown", keydownHandler, true);
-		}, 500);
-	};
-	const keydownHandler = (event) => {
-		// Trying to let you change the display or capture the output
-		// not allowing Ctrl+PrintScreen etc. because no modifiers
-		if (!(["F11", "F12", "ZoomToggle", "PrintScreen", "MediaRecord", "BrightnessDown", "BrightnessUp", "Dimmer"].includes(event.key))) {
-			event.preventDefault();
-			event.stopPropagation();
-			cleanUp();
-		}
-	};
-	let startMouseX, startMouseY;
-	$surface.on("mousemove pointermove", (event) => {
-		if (startMouseX === undefined) {
-			startMouseX = event.pageX;
-			startMouseY = event.pageY;
-		}
-		if (Math.hypot(startMouseX - event.pageX, startMouseY - event.pageY) > mouseDistanceToExit) {
-			cleanUp();
-		}
-	});
-	$surface.on("mousedown pointerdown touchstart", (event) => {
-		event.preventDefault();
-		cleanUp();
-	});
-	// useCapture needed for scenario where you hit Enter, with a desktop icon selected
-	// (If it relaunches the screensaver, it's like you can't exit it!)
-	window.addEventListener("keydown", keydownHandler, true);
-}
-
-function Pipes() {
-	const options = { hideUI: true };
-	showScreensaver(`programs/pipes/index.html#${encodeURIComponent(JSON.stringify(options))}`);
-}
-
-function FlowerBox() {
-	showScreensaver("programs/3D-FlowerBox/index.html");
-}
-
-function CommandPrompt() {
-	var $win = make_iframe_window({
-		src: "programs/command/index.html",
-		icons: iconsAtTwoSizes("msdos"),
-		title: "MS-DOS Prompt",
-		// TODO: default dimensions
-		innerWidth: 640,
-		innerHeight: 400,
-		constrainRect(rect, x_axis, y_axis) {
-			const char_width = 8;
-			const char_height = 16;
-			const border = ($win.outerWidth() - $win.$content.outerWidth()) / 2;
-			const inner_rect = {
-				x: rect.x + border,
-				y: rect.y + border + $win.$titlebar.outerHeight(),
-				width: rect.width - $win.outerWidth() + $win.$content.outerWidth(),
-				height: rect.height - $win.outerHeight() + $win.$content.outerHeight(),
-			};
-			const new_inner_rect = {
-				width: Math.floor(inner_rect.width / char_width) * char_width,
-				height: Math.floor(inner_rect.height / char_height) * char_height,
-			};
-			const new_rect = {
-				x: inner_rect.x - border,
-				y: inner_rect.y - border - $win.$titlebar.outerHeight(),
-				width: new_inner_rect.width + $win.outerWidth() - $win.$content.outerWidth(),
-				height: new_inner_rect.height + $win.outerHeight() - $win.$content.outerHeight(),
-			};
-			if (x_axis === -1) {
-				new_rect.x = rect.x + rect.width - new_rect.width;
-			}
-			if (y_axis === -1) {
-				new_rect.y = rect.y + rect.height - new_rect.height;
-			}
-			return new_rect;
-		},
-		// TODO: make the API simpler / more flexible like:
-		// constrainDimensions({ innerWidth, innerHeight }) {
-		// 	const charWidth = 8;
-		// 	const charHeight = 16;
-		// 	innerWidth = Math.floor(innerWidth / charWidth) * charWidth;
-		// 	innerHeight = Math.floor(innerHeight / charHeight) * charHeight;
-		// 	return { innerWidth, innerHeight };
-		// },
-	});
-	return new Task($win);
-}
-
-function Calculator() {
-	var $win = make_iframe_window({
-		src: "programs/calculator/index.html",
-		icons: iconsAtTwoSizes("calculator"),
-		title: "Calculator",
-		innerWidth: 256,
-		innerHeight: 208 + 21,
-		minInnerWidth: 256,
-		minInnerHeight: 208 + 21,
-	});
-	return new Task($win);
-}
-
-function Pinball() {
-	var $win = make_iframe_window({
-		src: "programs/pinball/space-cadet.html",
-		icons: iconsAtTwoSizes("pinball"),
-		title: "3D Pinball for Windows - Space Cadet",
-		innerWidth: 600,
-		innerHeight: 416 + 20, // @TODO: where's this 20 coming from?
-		minInnerWidth: 600,
-		minInnerHeight: 416 + 20,
-		// resizable: false, // @TODO (maybe) once gray maximized button is implemented
-		override_alert: false, // to handle the alert as a fatal error, and to compensate for overzealous preventDefault()
-	});
-	const $splash = $("<div>").css({
-		position: "fixed",
-		top: 0,
-		left: 0,
-		width: "100%",
-		height: "100%",
-		background: "url(images/pinball-splash.png) no-repeat center center",
-		backgroundColor: "black",
-		zIndex: $Window.Z_INDEX + 6000,
-	}).appendTo("body");
-	setTimeout(() => {
-		$splash.remove(); // just in case
-	}, 5000);
-	$win.$content.find("iframe").on("game-loaded", () => { // custom event dispatched from within the iframe
-		$splash.remove();
-	});
-	$win.$content.find("iframe").on("game-load-failed", () => { // custom event dispatched from within the iframe
-		$splash.remove();
-		// on some systems, if the game fails to load,
-		// it may result in the canvas showing through to the desktop behind the browser window
-		// let's call it a feature, tie it in thematically,
-		// and pretend like we did it on purpose, to baffle and amuse.
-		// This happens for me on Chrome on Ubuntu with Xfce, when coming out of suspend.
-		// It says "Could not create renderer / Couldn't find matching render driver"
-		// It keeps happening with live reload, but stops on a regular reload, or duplicating the tab.
-		$win.title("Wormhole Window - Space Cadet");
-	});
-	return new Task($win);
-}
-
-function Explorer(address) {
-	// TODO: DRY the default file names and title code (use document.title of the page in the iframe, in make_iframe_window)
-	var document_title = address;
-	var win_title = document_title;
-	// TODO: focus existing window if folder is currently open
-	var $win = make_iframe_window({
-		src: "programs/explorer/index.html" + (address ? ("?address=" + encodeURIComponent(address)) : ""),
-		icons: iconsAtTwoSizes("folder-open"),
-		title: win_title,
-		// this is based on one measurement, but it uses different sizes depending on the screen resolution,
-		// and may be different for different Explorer window types (Microsoft Internet Explorer, "Exploring", normal Windows Explorer*),
-		// and may store the window positions, even for different types or folders, so I might have a non-standard default size measurement.
-		// *See different types (resized for posing this screenshot): https://imgur.com/nxAcT9C
-		innerWidth: Math.min(856, innerWidth * 0.9),
-		innerHeight: Math.min(547, innerHeight * 0.7),
-	});
-	return new Task($win);
-}
-Explorer.acceptsFilePaths = true;
-
-var webamp_bundle_loaded = false;
-var load_winamp_bundle_if_not_loaded = function (includeButterchurn, callback) {
-	// FIXME: webamp_bundle_loaded not actually set to true when loaded
-	// TODO: also maybe handle already-loading-but-not-done
-	if (webamp_bundle_loaded) {
-		callback();
-	} else {
-		// TODO: parallelize (if possible)
-		$.getScript("programs/winamp/lib/webamp.bundle.min.js", () => {
+    $iframe.attr({ name: "help-frame" });
+    $iframe.css({
+        backgroundColor: "white",
+        border: "",
+        margin: "1px",
+    });
+    $contents.css({
+        margin: "1px",
+    });
+    $help_window.center();
 			if (includeButterchurn) {
 				$.getScript("programs/winamp/lib/butterchurn.min.js", () => {
 					$.getScript("programs/winamp/lib/butterchurnPresets.min.js", () => {

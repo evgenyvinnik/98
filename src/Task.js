@@ -2,29 +2,17 @@ Task.all_tasks = [];
 function Task(win) {
 	Task.all_tasks.push(this);
 
-	this.$window = win;
-	
-	const $task = this.$task = $("<button class='task toggle'/>").appendTo($(".tasks"));
-	const $title = $("<span class='title'/>");
+	this.win = win;
+
+	// Add the window to the global state.
+	this.id = window.windows.add(win);
 
 	this.updateTitle = () => {
-		$title.text(win.getTitle());
+		window.windows.update(this.id, { title: win.getTitle() });
 	};
 
-	let $icon;
 	this.updateIcon = () => {
-		const old_$icon = $icon;
-		$icon = win.getIconAtSize(16);
-		if (!$icon) {
-			// $icon = $("<img src='images/icons/task-16x16.png'/>");
-			old_$icon?.remove();
-			return;
-		}
-		if (old_$icon) {
-			old_$icon.replaceWith($icon);
-		} else {
-			$task.prepend($icon);
-		}
+		window.windows.update(this.id, { icon: win.getIconAtSize(16) });
 	};
 
 	this.updateTitle();
@@ -33,32 +21,19 @@ function Task(win) {
 	win.on("title-change", this.updateTitle);
 	win.on("icon-change", this.updateIcon);
 
-	win.setMinimizeTarget($task[0]);
-
-	$task.append($icon, $title);
-	$task.on("pointerdown", function (e) {
-		e.preventDefault(); // prevent focus, so that the window keeps focus and we can know for minimization if it it should be focused or minimized
-		// @TODO: do it on whole taskbar
-	});
-	$task.on("click", function () {
-		if ($task.hasClass("selected")) {
-			win.minimize();
-			win.blur();
-		} else {
-			win.unminimize();
-			win.bringToFront();
-			win.focus();
-		}
-	});
+	// The minimize target is now handled by the React component, but we might need a reference to the taskbar button.
+	// For now, we'll leave this empty.
+	win.setMinimizeTarget(document.createElement('div')); // Dummy element
 
 	win.onFocus(() => {
-		$task.addClass("selected");
+		window.windows.focus(this.id);
 	});
 	win.onBlur(() => {
-		$task.removeClass("selected");
+		// The concept of a 'deselected' task is now just a window that isn't focused.
+		// The context handles this automatically.
 	});
 	win.onClosed(() => {
-		$task.remove();
+		window.windows.remove(this.id);
 		const index = Task.all_tasks.indexOf(this);
 		if (index !== -1) {
 			Task.all_tasks.splice(index, 1);

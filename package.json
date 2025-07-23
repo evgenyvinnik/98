@@ -48,7 +48,10 @@
 		"rimraf": "^2.6.2",
 		"send": "^0.17.1",
 		"vite": "^7.0.5",
-		"webamp": "1.5.0"
+		"webamp": "1.5.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"@vitejs/plugin-react": "^4.0.3"
 	},
 	"scripts": {
 		"test": "playwright test --reporter=list",
@@ -57,8 +60,7 @@
 		"test-codegen:codegen": "npx playwright codegen http://localhost:1998",
 		"lint": "cspell-cli lint .",
 		"dev": "vite",
-    "build": "vite build",
-		
+		"build": "vite build",
 		"watch-fs-index": "onchange --initial --poll 1000 --kill -f add -f addDir -f unlink -f unlinkDir '**' --exclude 'filesystem-index.json' --exclude '**/.history/**' -- npm run make-fs-index",
 		"watch-fs-index @NOTE 1": "--kill makes it not queue up the events as tasks (as well as sending kill signal to old process)",
 		"watch-fs-index @NOTE 2": "When many files are changed, such as when doing a rebase or otherwise checking out old commits, it can take a long time to start working again. Add --verbose to view the stupid behavior. It probably makes it slower too, logging a lot.",
