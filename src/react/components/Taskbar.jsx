@@ -5,10 +5,9 @@ import { useWindows } from '../context/WindowsContext';
  * Taskbar component that renders the Windows 98 taskbar
  * This will gradually replace the functionality in the taskbar-related code
  */
-const Taskbar = () => {
+const Taskbar = ({ onToggleStartMenu }) => {
   const { windows, focusWindow, minimizeWindow } = useWindows();
   const [time, setTime] = useState('');
-  const [showStartMenu, setShowStartMenu] = useState(false);
 
   // Update the clock
   useEffect(() => {
@@ -41,7 +40,9 @@ const Taskbar = () => {
   };
 
   const toggleStartMenu = () => {
-    setShowStartMenu(prev => !prev);
+    if (onToggleStartMenu) {
+      onToggleStartMenu();
+    }
   };
 
   return (

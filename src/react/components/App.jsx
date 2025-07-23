@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Desktop from './Desktop';
 import Taskbar from './Taskbar';
 import WindowSwitcher from './WindowSwitcher';
+import { StartMenu } from './StartMenu';
 import { WindowsProvider } from '../context/WindowsContext';
 import { MessageBoxProvider } from './MessageBox';
 import { FileDialogProvider } from '../context/FileDialogContext';
@@ -42,13 +43,27 @@ const App = () => {
     setInitialized(true);
   }, []);
 
+  // State for start menu visibility
+  const [startMenuVisible, setStartMenuVisible] = useState(false);
+  
+  // Toggle start menu visibility
+  const toggleStartMenu = () => {
+    setStartMenuVisible(!startMenuVisible);
+  };
+  
+  // Close start menu
+  const closeStartMenu = () => {
+    setStartMenuVisible(false);
+  };
+  
   return (
     <WindowsProvider>
       <MessageBoxProvider>
         <FileDialogProvider>
           <div className="react-win98-app">
             <Desktop />
-            <Taskbar />
+            <Taskbar onToggleStartMenu={toggleStartMenu} />
+            {startMenuVisible && <StartMenu isOpen={startMenuVisible} onClose={closeStartMenu} />}
             {windowSwitcherVisible && <WindowSwitcher />}
           </div>
         </FileDialogProvider>
