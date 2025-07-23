@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWindows } from '../context/WindowsContext';
 import Window from './Window';
+import FolderView from './FolderView';
 import useFilesystem from '../hooks/useFilesystem';
 
 /**
@@ -19,18 +20,18 @@ const Desktop = () => {
   const desktopRef = useRef(null);
   const filesystem = useFilesystem();
 
-  // Load desktop icons (this would eventually connect to the existing filesystem)
-  useEffect(() => {
-    // For now, we'll just define some placeholder icons
-    // Later, this will integrate with the existing filesystem code
-    setIcons([
-      { id: 'my-computer', title: 'My Computer', icon: '/images/icons/my-computer-32x32.png' },
-      { id: 'my-documents', title: 'My Documents', icon: '/images/icons/my-documents-32x32.png' },
-      { id: 'network-neighborhood', title: 'Network Neighborhood', icon: '/images/icons/network-neighborhood-32x32.png' },
-      { id: 'recycle-bin', title: 'Recycle Bin', icon: '/images/icons/recycle-bin-32x32.png' },
-      { id: 'internet-explorer', title: 'Internet Explorer', icon: '/images/icons/internet-explorer-32x32.png' }
-    ]);
-  }, []);
+  // The desktop folder path is defined in filesystem-setup.js
+  const desktopFolderPath = '/desktop/';
+  
+  // Handle opening files or folders from the desktop
+  const handleOpenFileOrFolder = (path) => {
+    console.log(`Opening file or folder: ${path}`);
+    
+    // Use the system execute file function if available
+    if (window.systemExecuteFile) {
+      window.systemExecuteFile(path);
+    }
+  };
   
   // Load wallpaper and theme from localStorage
   useEffect(() => {
@@ -159,15 +160,12 @@ const Desktop = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Desktop Icons */}
-      <div className="desktop-icons">
-        {icons.map(icon => (
-          <div key={icon.id} className="desktop-icon">
-            <img src={icon.icon} alt={icon.title} />
-            <span>{icon.title}</span>
-          </div>
-        ))}
-      </div>
+      {/* Desktop Icons using FolderView */}
+      <FolderView 
+        folderPath={desktopFolderPath}
+        asDesktop={true}
+        openFileOrFolder={handleOpenFileOrFolder}
+      />
 
       {/* Windows */}
       {windows.map(window => (
